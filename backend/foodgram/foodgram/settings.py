@@ -6,7 +6,7 @@ SECRET_KEY = '2)q#92y+2zi(&txe*j5hum-gsactk(+7#x%st&aa494jtw2nkm'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['host.docker.internal']
+ALLOWED_HOSTS = ['host.docker.internal', '127.0.0.1']
 
 
 INSTALLED_APPS = [
