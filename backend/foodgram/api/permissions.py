@@ -3,7 +3,8 @@ from rest_framework import permissions
 
 class IsAdminOrAuthorOrReadOnly(permissions.BasePermission):
     """
-    Разрешение: админ, автор или только чтение для аутентифицированных пользователей.
+    Разрешение: админ, автор или только чтение для
+    аутентифицированных пользователей.
     """
     def has_permission(self, request, view):
         """

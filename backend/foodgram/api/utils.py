@@ -15,7 +15,6 @@ from .recipe_service import RecipeService
 from .constants import NUMBERING
 
 
-
 def shop_list(request):
     file_format = request.GET.get('format', 'txt')
 
@@ -25,9 +24,9 @@ def shop_list(request):
         'ingredient__measurement_unit').annotate(
         ingredient_name=F('ingredient__name'),
         total_amount=Sum('amount'))
-    data = ingredients.values_list('ingredient__name',
-                                   'ingredient__measurement_unit',
-                                   'total_amount')
+    ingredients.values_list('ingredient__name',
+                            'ingredient__measurement_unit',
+                            'total_amount')
     shopping_cart = 'Что купить:\n'
 
     index = NUMBERING
@@ -51,11 +50,16 @@ def shop_list(request):
 
         buffer.seek(0)
         response = FileResponse(buffer, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="shopping_cart.pdf"'
+        response['Content-Disposition'] = (
+            'attachment; filename="shopping_cart.pdf"'
+        )
         return response
     else:
-        response = HttpResponse(shopping_cart, content_type='text/plain; charset=utf-8')
-        response['Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
+        response = HttpResponse(shopping_cart,
+                                content_type='text/plain; charset=utf-8')
+        response['Content-Disposition'] = (
+            'attachment; filename="shopping_cart.txt"'
+        )
         return response
 
 

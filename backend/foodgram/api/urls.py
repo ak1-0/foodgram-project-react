@@ -14,12 +14,8 @@ router.register('tags', TagViewSet, basename='tags')
 router.register('users', UsersViewSet, basename='users')
 router.register('recipes', RecipeViewSet, basename='recipes')
 
-urlpatterns = (
-    path(
-        'recipes/download_shopping_cart/',
-         shop_list,
-         name='shop_list'
-         ),
-    path('', include(router.urls)),
-    path('auth/', include('djoser.urls.authtoken')),
-)
+urlpatterns = (path('recipes/download_shopping_cart/',
+               shop_list,
+               name='shop_list'),
+               path('', include(router.urls)),
+               path('auth/', include('djoser.urls.authtoken')),)

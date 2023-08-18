@@ -12,14 +12,15 @@ class Base64ImageField(ImageField):
         r"data:image/(?P<extension>\w+);base64,(?P<encoded_image>.*)")
 
     def to_internal_value(self, base64_data):
-        """Преобразует base64-кодированное изображение во внутреннее значение"""
+        """Преобразует base64-кодированное
+        изображение во внутреннее значение"""
         if isinstance(base64_data, str):
             match = self._base64_image_pattern.match(base64_data)
             if match:
                 extension = match.group("extension")
                 encoded_image = match.group("encoded_image")
                 decoded_image = base64.b64decode(encoded_image)
-                content_file = ContentFile(decoded_image, name=f"temp.{extension}")
+                content_file = ContentFile(decoded_image,
+                                           name=f"temp.{extension}")
 
         return super().to_internal_value(content_file)
-

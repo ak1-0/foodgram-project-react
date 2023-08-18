@@ -81,6 +81,7 @@ class SubscribedMixin:
     def get_is_subscribed(self, obj):
         return is_user_subscribed(request=self.context.get('request'), obj=obj)
 
+
 class UsersSerializer(SubscribedMixin, UserSerializer):
     """
     Сериализатор пользователей.
@@ -97,11 +98,13 @@ class CreateUserSerializer(SubscribedMixin, UserCreateSerializer):
     """
     Сериализатор для создания пользователей.
     """
-    username = serializers.CharField(max_length=150, validators=[validate_username_format])
+    username = serializers.CharField(max_length=150,
+                                     validators=[validate_username_format])
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'first_name', 'last_name', 'password', 'id')
+        fields = ('email', 'username', 'first_name',
+                  'last_name', 'password', 'id')
 
 
 class FullRecipeSerializer(serializers.ModelSerializer):
@@ -110,7 +113,7 @@ class FullRecipeSerializer(serializers.ModelSerializer):
     """
     author = UsersSerializer(read_only=True)
     ingredients = RecipeIngredientSerializer(many=True,
-                                               source='recipes')
+                                             source='recipes')
     tags = TagSerializer(many=True)
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
@@ -127,7 +130,8 @@ class FullRecipeSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         """
-        Возвращает, добавлен ли рецепт в корзину покупок у текущего пользователя.
+        Возвращает, добавлен ли рецепт в корзину покупок
+        текущего пользователя.
         """
         return (self.context.get('request')
                 and not self.context.get('request').user.is_anonymous
@@ -139,7 +143,6 @@ class FullRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'tags', 'author', 'name', 'image', 'text',
                   'ingredients', 'cooking_time',
                   'is_favorited', 'is_in_shopping_cart')
-
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -178,7 +181,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ]
         with transaction.atomic():
             RecipeIngredientAmount.objects.filter(recipe=recipe).delete()
-            RecipeIngredientAmount.objects.bulk_create(recipe_ingredient_amounts)
+            RecipeIngredientAmount.objects.bulk_create(
+                recipe_ingredient_amounts)
 
     def create(self, validated_data):
         """
@@ -186,15 +190,16 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         """
         ingredient_data_list = validated_data.pop('ingredients')
         tag_data_list = validated_data.pop('tags')
-        author = self.context['request'].user  # Получение автора рецепта из запроса
-        recipe = Recipe.objects.create(author=author, **validated_data)  # Установка автора рецепта
+        author = self.context['request'].user
+        recipe = Recipe.objects.create(author=author, **validated_data)
         recipe.tags.set(tag_data_list)
         self.save_ingredients(recipe, ingredient_data_list)
         return recipe
 
     def update(self, instance, validated_data):
         """
-        Обновляет данные рецепта и связи с ингредиентами при обновлении рецепта.
+        Обновляет данные рецепта и связи
+        с ингредиентами при обновлении рецепта.
         """
         if 'ingredients' in validated_data:
             ingredient_data_list = validated_data.pop('ingredients')
@@ -210,8 +215,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         if 'tags' in validated_data:
             instance.tags.set(validated_data['tags'])
         return super().update(instance, validated_data)
-    
-    to_representation = serializers.SerializerMethodField()
 
     def to_representation(self, instance):
         """
@@ -219,7 +222,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         """
         context = {'request': self.context.get('request')}
         return FullRecipeSerializer(instance, context=context).data
-
 
 
 class BaseRecipeSerializer(serializers.ModelSerializer):
@@ -259,7 +261,8 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 class ChangePasswordSerializer(serializers.ModelSerializer):
     """Сериализатор для изменения пароля пользователя."""
     old_password = serializers.CharField()
-    new_password = serializers.CharField(validators=[validate_updated_password])
+    new_password = serializers.CharField(
+        validators=[validate_updated_password])
 
     class Meta:
         model = User
@@ -271,12 +274,13 @@ class BaseUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(read_only=True)
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)
-    first_name = serializers.CharField(read_only=True)  
+    first_name = serializers.CharField(read_only=True)
     last_name = serializers.CharField(read_only=True)
 
     def get_recipes(self, obj):
         """
-        Возвращает список рецептов пользователя с ограничением по количеству.
+        Возвращает список рецептов пользователя
+        с ограничением по количеству.
         """
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
@@ -294,9 +298,9 @@ class BaseUserSerializer(serializers.ModelSerializer):
         return obj.recipes.count()
 
     class Meta:
-        fields = ['email', 'id', 'username', 
-                 'first_name', 'last_name']
-        
+        fields = ['email', 'id', 'username',
+                  'first_name', 'last_name']
+
 
 class RecipeFollowSerializer(BaseUserSerializer, UsersSerializer):
     """
@@ -307,13 +311,13 @@ class RecipeFollowSerializer(BaseUserSerializer, UsersSerializer):
 
     class Meta:
         model = User
-        fields = BaseUserSerializer.Meta.fields + [
-      'recipes_count', 'recipes'
-    ]
+        fields = BaseUserSerializer.Meta.fields + ['recipes_count',
+                                                   'recipes']
 
     def get_recipes(self, obj):
         """
-        Возвращает список рецептов пользователя с ограничением по количеству.
+        Возвращает список рецептов пользователя
+        с ограничением по количеству.
         """
         return super().get_recipes(obj)
 
@@ -332,9 +336,7 @@ class UserFollowSerializer(BaseUserSerializer):
 
     class Meta(BaseUserSerializer.Meta):
         model = User
-        fields = BaseUserSerializer.Meta.fields + [
-      'is_subscribed'  
-    ]
+        fields = BaseUserSerializer.Meta.fields + ['is_subscribed']
 
     def get_is_subscribed(self, obj):
         """
@@ -344,7 +346,8 @@ class UserFollowSerializer(BaseUserSerializer):
 
     def get_recipes(self, obj):
         """
-        Возвращает список рецептов пользователя с ограничением по количеству.
+        Возвращает список рецептов пользователя
+        с ограничением по количеству.
         """
         return super().get_recipes(obj)
 

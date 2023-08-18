@@ -1,7 +1,7 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+
 from rest_framework.decorators import action
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import permissions, status
 
@@ -36,15 +36,16 @@ class BaseRecipeMixin:
         Добавить рецепт в избранное.
         """
         recipe = self.get_recipe(pk)
-        favorite = Favorite.objects.create(user=request.user, recipe=recipe)
-        return Response({'detail': 'Рецепт успешно добавлен в избранное'})
+        Favorite.objects.create(user=request.user, recipe=recipe)
+        return Response({'detail': 'Рецепт добавлен в избранное'})
 
     def _remove_from_favorites(self, request, pk):
         """
         Удалить рецепт из избранного.
         """
         recipe = self.get_recipe(pk)
-        favorite = Favorite.objects.filter(user=request.user, recipe=recipe).first()
+        favorite = Favorite.objects.filter(user=request.user,
+                                           recipe=recipe).first()
         if favorite:
             favorite.delete()
             return Response({'detail': 'Рецепт удален из избранного'})
@@ -66,7 +67,7 @@ class BaseRecipeMixin:
         Добавить рецепт в корзину.
         """
         recipe = self.get_recipe(pk)
-        shopping_cart = ShoppingCart.objects.create(user=request.user, recipe=recipe)
+        ShoppingCart.objects.create(user=request.user, recipe=recipe)
         return Response({'detail': 'Рецепт добавлен в корзину'})
 
     def _remove_from_shopping_cart(self, request, pk):
@@ -74,7 +75,8 @@ class BaseRecipeMixin:
         Удалить рецепт из корзины.
         """
         recipe = self.get_recipe(pk)
-        shopping_cart = ShoppingCart.objects.filter(user=request.user, recipe=recipe).first()
+        shopping_cart = ShoppingCart.objects.filter(user=request.user,
+                                                    recipe=recipe).first()
         if shopping_cart:
             shopping_cart.delete()
             return Response({'detail': 'Рецепт удален из корзины'})
@@ -96,8 +98,8 @@ class SubscriptionsMixin:
         queryset = User.objects.filter(subscriber__user=self.request.user)
         pages = self.paginate_queryset(queryset)
         serializer = UserFollowSerializer(pages,
-                                             many=True,
-                                             context={'request': request})
+                                          many=True,
+                                          context={'request': request})
         return self.get_paginated_response(serializer.data)
 
 
@@ -115,12 +117,9 @@ class SubscribeMixin:
                                    id=kwargs['id'])
 
         if request.method == 'POST':
-            if self.request.user == author:
-                return Response({'detail': 'Невозмодно подписаться на себя'},
-                                status=status.HTTP_400_BAD_REQUEST)
             serializer = RecipeFollowSerializer(author,
-                                             data=request.data,
-                                             context={"request": request})
+                                                data=request.data,
+                                                context={"request": request})
             serializer.is_valid(raise_exception=True)
             Subscription.objects.create(user=request.user,
                                         author=author)
@@ -129,7 +128,7 @@ class SubscribeMixin:
         get_object_or_404(Subscription,
                           user=request.user,
                           author=author).delete()
-        return Response({'detail': 'Успешная отписка'},
+        return Response({'detail': 'Вы отписались от автора'},
                         status=status.HTTP_204_NO_CONTENT)
 
 
@@ -145,7 +144,7 @@ class SetPasswordMixin(object):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
 
 class FavoriteRecipeMixin(BaseRecipeMixin):
     """
@@ -163,7 +162,6 @@ class FavoriteRecipeMixin(BaseRecipeMixin):
             return self.add_to_favorites(request, pk)
         elif request.method == 'DELETE':
             return self._remove_from_favorites(request, pk)
-        
 
 
 class ShoppingCartMixin(BaseRecipeMixin):
@@ -180,5 +178,3 @@ class ShoppingCartMixin(BaseRecipeMixin):
             return self._add_to_shopping_cart(request, pk)
         elif request.method == 'DELETE':
             return self._remove_from_shopping_cart(request, pk)
-
-    

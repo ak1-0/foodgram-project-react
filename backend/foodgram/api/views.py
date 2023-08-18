@@ -45,8 +45,8 @@ class TagViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
-class UsersViewSet(UserViewSet, viewsets.GenericViewSet, 
-                   SubscriptionsMixin, 
+class UsersViewSet(UserViewSet, viewsets.GenericViewSet,
+                   SubscriptionsMixin,
                    SubscribeMixin,
                    SetPasswordMixin):
     """
@@ -56,6 +56,7 @@ class UsersViewSet(UserViewSet, viewsets.GenericViewSet,
     serializer_class = UsersSerializer
     pagination_class = CustomPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
     @action(detail=False, permission_classes=[IsAuthenticated])
     def me(self, request):
         serializer = self.get_serializer(request.user)
@@ -67,7 +68,7 @@ class RecipeViewSet(viewsets.ModelViewSet,
                     ShoppingCartMixin,
                     BaseRecipeMixin):
     """
-    Представление рецептов: список, создание, 
+    Представление рецептов: список, создание,
     изменение, удаление, избранное, корзина.
     """
     queryset = Recipe.objects.all()
@@ -83,12 +84,12 @@ class RecipeViewSet(viewsets.ModelViewSet,
 
     @action(detail=True, methods=['post'])
     def add_to_favorites(self, request, pk):
-        return self.favorite_recipe(request, pk)  
+        return self.favorite_recipe(request, pk)
 
     @action(detail=True, methods=['delete'])
     def remove_from_favorites(self, request, pk):
         return self.remove_from_favorites(request, pk)
-    
+
     @action(detail=True, methods=['post'])
     def add_to_shopping_cart(self, request, pk):
         return self._add_to_shopping_cart(request, pk)

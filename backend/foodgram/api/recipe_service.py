@@ -10,7 +10,10 @@ class RecipeService:
         """
         Добавление объекта в модель связей с рецептом.
         """
-        obj, created = model.objects.get_or_create(user=request.user, recipe=recipe)
+        obj, created = model.objects.get_or_create(
+                                                   user=request.user,
+                                                   recipe=recipe
+                                                   )
         if created:
             return True
         else:
