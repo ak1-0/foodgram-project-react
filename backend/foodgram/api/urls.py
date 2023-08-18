@@ -1,14 +1,25 @@
-from rest_framework import routers
-from django.urls import path, include
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
-from api.views import index, CustomUserViewSet, TagViewSet
+from .utils import shop_list
+from .views import IngredientViewSet, RecipeViewSet, TagViewSet, UsersViewSet
 
-router = routers.DefaultRouter()
-router.register('users', CustomUserViewSet)
-router.register('tags', TagViewSet)
+app_name = 'api'
 
-urlpatterns = [
-    path('index', index),
+router = DefaultRouter()
+
+
+router.register('ingredients', IngredientViewSet, basename='ingredients')
+router.register('tags', TagViewSet, basename='tags')
+router.register('users', UsersViewSet, basename='users')
+router.register('recipes', RecipeViewSet, basename='recipes')
+
+urlpatterns = (
+    path(
+        'recipes/download_shopping_cart/',
+         shop_list,
+         name='shop_list'
+         ),
+    path('', include(router.urls)),
     path('auth/', include('djoser.urls.authtoken')),
-    path('', include(router.urls))
-]
+)
