@@ -29,3 +29,4 @@ djoser==2.1.0
 django-filters==2.4.0
 reportlab
 sqlparse==0.4.4
+dotenv

@@ -27,8 +27,7 @@ def validate_ingredient_amount(value):
         amount = ingredient.get('amount')
         if amount == 0:
             raise serializers.ValidationError(
-                'Количество ингредиента должно быть больше нуля!'
-                )
+                'Количество ингредиента должно быть больше нуля!')
     return value
 
 
@@ -38,8 +37,7 @@ def validate_cooking_duration(value):
     """
     if value < 1:
         raise serializers.ValidationError(
-            'Время приготовления должно быть не менее 1 минуты'
-            )
+            'Время приготовления должно быть не менее 1 минуты')
 
 
 def validate_updated_password(value, initial_data):
@@ -48,6 +46,5 @@ def validate_updated_password(value, initial_data):
     """
     if value == initial_data.get('current_password'):
         raise serializers.ValidationError(
-            'Новый пароль не может совпадать со старым'
-            )
+            'Новый пароль не может совпадать со старым')
     return value

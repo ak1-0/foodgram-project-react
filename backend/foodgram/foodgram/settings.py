@@ -1,17 +1,17 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-SECRET_KEY = 'django-insecure-w7*on(gb64&nkkxqof^!77=knlzw2y@u_$x%5^dgxgjff^bwh='
-
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
 ALLOWED_HOSTS = ['host.docker.internal', '127.0.0.1', 'localhost']
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
