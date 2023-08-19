@@ -344,15 +344,3 @@ class UserFollowSerializer(BaseUserSerializer):
         """
         return is_user_subscribed(request=self.context.get('request'), obj=obj)
 
-    def get_recipes(self, obj):
-        """
-        Возвращает список рецептов пользователя
-        с ограничением по количеству.
-        """
-        return super().get_recipes(obj)
-
-    def get_recipes_count(self, obj):
-        """
-        Возвращает общее количество рецептов у пользователя.
-        """
-        return super().get_recipes_count(obj)
