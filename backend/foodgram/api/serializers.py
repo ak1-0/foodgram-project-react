@@ -306,7 +306,7 @@ class RecipeFollowSerializer(BaseUserSerializer, UsersSerializer):
     """
     Сериализатор для подписки пользователя.
     """
-    recipes_count = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField(read_only=True)
     recipes = serializers.SerializerMethodField()
 
     class Meta:

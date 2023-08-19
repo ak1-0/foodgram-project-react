@@ -1,66 +1,67 @@
 from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from django.http import FileResponse, HttpResponse
-from reportlab.platypus import Paragraph, SimpleDocTemplate
+
 from django.db.models import Sum
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+
 from rest_framework import status
-from recipes.models import Recipe
 from rest_framework.response import Response
-from django.db.models import F
 
-from recipes.models import RecipeIngredientAmount
+from recipes.models import Recipe, RecipeIngredientAmount
 from users.models import Subscription
+from .constants import NUMBERING, START
 from .recipe_service import RecipeService
-from .constants import NUMBERING
 
 
-def shop_list(request):
-    file_format = request.GET.get('format', 'txt')
-
+def download_shopping_cart(request):
     ingredients = RecipeIngredientAmount.objects.filter(
         recipe__in_shopping_carts__user=request.user).values(
         'ingredient__name',
         'ingredient__measurement_unit').annotate(
-        ingredient_name=F('ingredient__name'),
         total_amount=Sum('amount'))
-    ingredients.values_list('ingredient__name',
-                            'ingredient__measurement_unit',
-                            'total_amount')
+    data = ingredients.values_list('ingredient__name',
+                                   'ingredient__measurement_unit',
+                                   'total_amount')
     shopping_cart = 'Что купить:\n'
 
-    index = NUMBERING
-    for ingredient in ingredients:
-        name = ingredient['ingredient_name'].capitalize()
-        measure = ingredient['ingredient__measurement_unit']
-        total_amount = ingredient['total_amount']
-        shopping_cart += f'{index}. {name}: {total_amount} {measure}\n'
-        index += NUMBERING
+    NUMBERING = 1
+    for name, measure, amount in data:
+        name = name.capitalize()
+        shopping_cart += f'{NUMBERING}. {name} - {amount} {measure}\n'
+        NUMBERING += 1
 
-    if file_format.lower() == 'pdf':
-        buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
+    # Создание PDF-документа
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
 
-        elements = []
-        shopping_cart_lines = shopping_cart.split('\n')
-        for line in shopping_cart_lines:
-            elements.append(Paragraph(line, encoding='utf-8'))
+    # Загрузка шрифта Arial
+    pdfmetrics.registerFont(TTFont('Arial', 'Arial.ttf'))
 
-        doc.build(elements)
+    # Создание стиля для абзаца с использованием шрифта Arial
+    styles = getSampleStyleSheet()
+    para_style = styles['Normal']
+    para_style.fontName = 'Arial'
 
-        buffer.seek(0)
-        response = FileResponse(buffer, content_type='application/pdf')
-        response['Content-Disposition'] = (
-            'attachment; filename="shopping_cart.pdf"'
-        )
-        return response
-    else:
-        response = HttpResponse(shopping_cart,
-                                content_type='text/plain; charset=utf-8')
-        response['Content-Disposition'] = (
-            'attachment; filename="shopping_cart.txt"'
-        )
-        return response
+    # Создание элементов документа (абзацев)
+    elements = []
+    shopping_cart_lines = shopping_cart.split('\n')
+    for line in shopping_cart_lines:
+        elements.append(Paragraph(line, para_style))
+
+    # Сборка документа
+    doc.build(elements)
+
+    # Подготовка и отправка HTTP-ответа с PDF-файлом
+    buffer.seek(START)
+    response = FileResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="shopping_cart.pdf"'
+    return response
 
 
 def is_user_subscribed(request, obj):

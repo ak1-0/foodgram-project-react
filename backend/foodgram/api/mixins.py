@@ -15,7 +15,7 @@ from .serializers import (BriefRecipeSerializer,
                           RecipeFollowSerializer,
                           UserFollowSerializer
                           )
-from .utils import recipe_add_or_del
+from .utils import recipe_add_or_del, download_shopping_cart
 
 
 class BaseRecipeMixin:
@@ -166,7 +166,8 @@ class FavoriteRecipeMixin(BaseRecipeMixin):
 
 class ShoppingCartMixin(BaseRecipeMixin):
     """
-    Миксин для функциональности корзины покупок.
+    Миксин для добавления и удаления рецептов из корзины покупок,
+    а так же скачивания списка покупок.
     """
 
     @action(detail=True, methods=['POST', 'DELETE'])
@@ -178,3 +179,10 @@ class ShoppingCartMixin(BaseRecipeMixin):
             return self._add_to_shopping_cart(request, pk)
         elif request.method == 'DELETE':
             return self._remove_from_shopping_cart(request, pk)
+        
+    @action(detail=False, methods=['get'])
+    def download_shopping_cart(self, request):
+        """
+        Скачать список покупок.
+        """
+        return download_shopping_cart(request)

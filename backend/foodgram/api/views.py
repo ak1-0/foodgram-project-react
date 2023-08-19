@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 
+
 from djoser.views import UserViewSet
 
 from recipes.models import Ingredient, Recipe, Tag
@@ -97,3 +98,4 @@ class RecipeViewSet(viewsets.ModelViewSet,
     @action(detail=True, methods=['delete'])
     def remove_from_shopping_cart(self, request, pk):
         return self.remove_from_shopping_cart(request, pk)
+
