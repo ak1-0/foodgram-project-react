@@ -10,7 +10,7 @@ from recipes.models import (Favorite,
                             ShoppingCart,
                             Tag)
 from users.models import User
-from .base64_image_field import Base64ImageField
+from .fields import Base64ImageField
 from .utils import is_user_subscribed
 from .validators import (validate_username_format,
                          validate_ingredient_amount,
@@ -343,4 +343,3 @@ class UserFollowSerializer(BaseUserSerializer):
         Возвращает информацию о подписке на пользователя.
         """
         return is_user_subscribed(request=self.context.get('request'), obj=obj)
-
