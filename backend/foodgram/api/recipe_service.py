@@ -14,10 +14,7 @@ class RecipeService:
             user=request.user,
             recipe=recipe
         )
-        if created:
-            return True
-        else:
-            return False
+        return created
 
     @staticmethod
     def remove(request, recipe, model):
@@ -26,4 +23,3 @@ class RecipeService:
         """
         obj = get_object_or_404(model, user=request.user, recipe=recipe)
         obj.delete()
-        return True
