@@ -1,19 +1,18 @@
 from django.contrib import admin
-from django.db.models import Count
 
-from .models import (Favorite, Ingredient, Recipe,
-                     ShoppingCart, Tag)
+from .models import Recipe, Ingredient, Tag, ShoppingCart, Favorite
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    verbose_name='Рецепт',
     list_display = ('id', 'name', 'author', 'count_favorites')
     list_filter = ('author', 'name', 'tags',)
 
     @staticmethod
     def count_favorites(obj):
-        return obj.count_favorites.aggregate(count=Count('id'))['count']
-    count_favorites.short_description = 'Количество в избранных'
+        return obj.in_favorites.count()
+    count_favorites.short_description='Количество в избранном'
 
 
 @admin.register(Ingredient)
@@ -35,3 +34,6 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     pass
+
+admin.site.site_header = 'Панель администратора FoodGram'
+admin.site.index_title = 'Рецепты и пользователи'

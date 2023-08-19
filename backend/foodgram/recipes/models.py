@@ -1,6 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.core.validators import RegexValidator
+from django.core.validators import (RegexValidator, 
+                                    MaxValueValidator, 
+                                    MinValueValidator)
+
+from api.constants import MAX_AMOUNT, MAX_TIME, MINIMUM
 
 measurement_unit_validator = RegexValidator(
     regex=r'^(гр|л|кг|ч\.л|ст\.л|щепотка|по вкусу)$',
@@ -85,8 +89,12 @@ class Recipe(models.Model):
         verbose_name='Тег'
     )
     cooking_time = models.PositiveSmallIntegerField(
-        verbose_name='Время приготовления'
-    )
+        verbose_name='Время приготовления',
+        validators=[
+            MinValueValidator(MINIMUM),
+            MaxValueValidator(MAX_TIME)
+        ]
+    )   
     pub_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата публикации'
@@ -116,8 +124,11 @@ class RecipeIngredientAmount(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
-        null=True
-    )
+        validators=[
+            MinValueValidator(MINIMUM),
+            MaxValueValidator(MAX_AMOUNT)
+        ]
+    ) 
 
     class Meta:
         verbose_name = "Ингредиент в рецепте"

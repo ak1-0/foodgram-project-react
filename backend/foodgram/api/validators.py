@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from .constants import MAX_AMOUNT, MAX_TIME, MINIMUM
+
 
 def validate_username_format(value):
     """
@@ -25,9 +27,13 @@ def validate_ingredient_amount(value):
     """
     for ingredient in value:
         amount = ingredient.get('amount')
-        if amount == 0:
+        if amount < MINIMUM:
             raise serializers.ValidationError(
                 'Количество ингредиента должно быть больше нуля!')
+        if amount > MAX_AMOUNT:
+            raise serializers.ValidationError(
+                f'Убедитесь что вы выбираете правильное количество ингредиента.'
+                f' Количество не должно превышать 1000!')
     return value
 
 
@@ -35,9 +41,12 @@ def validate_cooking_duration(value):
     """
     Проверка корректности времени приготовления.
     """
-    if value < 1:
+    if value < MINIMUM:
         raise serializers.ValidationError(
             'Время приготовления должно быть не менее 1 минуты')
+    if value > MAX_TIME:
+        raise serializers.ValidationError(
+            'Время приготовления не должно превышать 120 минут')
 
 
 def validate_updated_password(value, initial_data):
