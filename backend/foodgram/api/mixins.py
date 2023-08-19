@@ -26,10 +26,7 @@ class BaseRecipeMixin:
         """
         Получить рецепт по его ID.
         """
-        try:
-            return Recipe.objects.get(id=pk)
-        except Recipe.DoesNotExist:
-            raise Http404
+        return get_object_or_404(Recipe, id=pk)
 
     def add_to_favorites(self, request, pk):
         """
