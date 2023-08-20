@@ -9,12 +9,12 @@ from recipes.models import (Favorite,
                             RecipeIngredientAmount,
                             ShoppingCart,
                             Tag)
-from users.models import User
+from users.models import User, Subscription
 from .fields import Base64ImageField
 from .utils import is_user_subscribed
 from .validators import (validate_username_format,
-                         validate_ingredient_amount,
                          validate_cooking_duration,
+                         validate_ingredient_amount,
                          validate_updated_password)
 
 
@@ -274,7 +274,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(read_only=True)
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)
-    first_name = serializers.CharField(read_only=True)
+    first_name = serializers.CharField(read_only=True)  
     last_name = serializers.CharField(read_only=True)
 
     def get_recipes(self, obj):
@@ -298,21 +298,21 @@ class BaseUserSerializer(serializers.ModelSerializer):
         return obj.recipes.count()
 
     class Meta:
-        fields = ['email', 'id', 'username',
-                  'first_name', 'last_name']
-
+        fields = ['email', 'id', 'username', 
+                 'first_name', 'last_name']
+        
 
 class RecipeFollowSerializer(BaseUserSerializer, UsersSerializer):
     """
     Сериализатор для подписки пользователя.
     """
-    recipes_count = serializers.SerializerMethodField(read_only=True)
+    recipes_count = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = BaseUserSerializer.Meta.fields + ['recipes_count',
-                                                   'recipes']
+        fields = BaseUserSerializer.Meta.fields + [
+      'recipes_count', 'recipes']
 
     def get_recipes(self, obj):
         """
@@ -336,7 +336,9 @@ class UserFollowSerializer(BaseUserSerializer):
 
     class Meta(BaseUserSerializer.Meta):
         model = User
-        fields = BaseUserSerializer.Meta.fields + ['is_subscribed']
+        fields = BaseUserSerializer.Meta.fields + [
+      'is_subscribed'  
+    ]
 
     def get_is_subscribed(self, obj):
         """

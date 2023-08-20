@@ -94,9 +94,9 @@ class SubscriptionsMixin:
         """
         queryset = User.objects.filter(subscriber__user=self.request.user)
         pages = self.paginate_queryset(queryset)
-        serializer = UserFollowSerializer(pages,
-                                          many=True,
-                                          context={'request': request})
+        serializer = RecipeFollowSerializer(pages,
+                                            many=True,
+                                            context={'request': request})
         return self.get_paginated_response(serializer.data)
 
 
@@ -110,13 +110,12 @@ class SubscribeMixin:
         """
         Подписаться или отписаться от автора.
         """
-        author = get_object_or_404(User,
-                                   id=kwargs['id'])
+        author = get_object_or_404(User, id=kwargs['id'])
 
         if request.method == 'POST':
-            serializer = RecipeFollowSerializer(author,
-                                                data=request.data,
-                                                context={"request": request})
+            serializer = UserFollowSerializer(author,
+                                              data=request.data,
+                                              context={"request": request})
             serializer.is_valid(raise_exception=True)
             Subscription.objects.create(user=request.user,
                                         author=author)
