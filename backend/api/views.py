@@ -1,3 +1,5 @@
+from django.db.models import Sum
+from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
@@ -7,7 +9,7 @@ from rest_framework.response import Response
 
 from djoser.views import UserViewSet
 
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import Ingredient, Recipe, Tag, RecipeIngredientAmount
 from users.models import User
 
 from .filters import IngredientSearchFilter, RecipeSearchFilter
@@ -24,6 +26,7 @@ from .serializers import (IngredientSerializer,
                           FullRecipeSerializer,
                           TagSerializer,
                           UsersSerializer)
+from .constants import NUMBERING
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
@@ -99,3 +102,30 @@ class RecipeViewSet(viewsets.ModelViewSet,
     def remove_from_shopping_cart(self, request, pk):
         return self.remove_from_shopping_cart(request, pk)
 
+    @action(detail=False, methods=['get'])
+    def download_shopping_cart(self, request):
+        ingredients = RecipeIngredientAmount.objects.filter(
+            recipe__in_shopping_carts__user=request.user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(
+            total_amount=Sum('amount')
+        )
+
+        data = ingredients.values_list(
+            'ingredient__name',
+            'ingredient__measurement_unit',
+            'total_amount'
+        )
+        shopping_cart = 'Что купить:\n'
+        counter = NUMBERING
+
+        for name, measure, amount in data:
+            shopping_cart += f'{counter}. {name} - {amount} {measure},\n'
+            counter += NUMBERING
+
+        shopping_cart = shopping_cart.rstrip('\n')
+
+        response = HttpResponse(shopping_cart, content_type='text/plain')
+        return response

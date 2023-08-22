@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.core.validators import (RegexValidator, 
-                                    MaxValueValidator, 
+from django.core.validators import (RegexValidator,
+                                    MaxValueValidator,
                                     MinValueValidator)
 
 from api.constants import MAX_AMOUNT, MAX_TIME, MINIMUM
@@ -94,7 +94,7 @@ class Recipe(models.Model):
             MinValueValidator(MINIMUM),
             MaxValueValidator(MAX_TIME)
         ]
-    )   
+    )
     pub_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата публикации'
@@ -128,7 +128,7 @@ class RecipeIngredientAmount(models.Model):
             MinValueValidator(MINIMUM),
             MaxValueValidator(MAX_AMOUNT)
         ]
-    ) 
+    )
 
     class Meta:
         verbose_name = "Ингредиент в рецепте"

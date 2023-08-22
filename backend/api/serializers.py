@@ -9,7 +9,7 @@ from recipes.models import (Favorite,
                             RecipeIngredientAmount,
                             ShoppingCart,
                             Tag)
-from users.models import User, Subscription
+from users.models import User
 from .fields import Base64ImageField
 from .utils import is_user_subscribed
 from .validators import (validate_username_format,
@@ -274,7 +274,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(read_only=True)
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)
-    first_name = serializers.CharField(read_only=True)  
+    first_name = serializers.CharField(read_only=True)
     last_name = serializers.CharField(read_only=True)
 
     def get_recipes(self, obj):
@@ -287,7 +287,8 @@ class BaseUserSerializer(serializers.ModelSerializer):
         recipes = obj.recipes.all()
         if limit:
             recipes = recipes[:int(limit)]
-        serializer = BriefRecipeSerializer(recipes, many=True, read_only=True)
+        serializer = BriefRecipeSerializer(recipes, many=True,
+                                           read_only=True)
         return serializer.data
 
     @staticmethod
@@ -298,9 +299,9 @@ class BaseUserSerializer(serializers.ModelSerializer):
         return obj.recipes.count()
 
     class Meta:
-        fields = ['email', 'id', 'username', 
-                 'first_name', 'last_name']
-        
+        fields = ['email', 'id', 'username',
+                  'first_name', 'last_name']
+
 
 class RecipeFollowSerializer(BaseUserSerializer, UsersSerializer):
     """
@@ -312,7 +313,7 @@ class RecipeFollowSerializer(BaseUserSerializer, UsersSerializer):
     class Meta:
         model = User
         fields = BaseUserSerializer.Meta.fields + [
-      'recipes_count', 'recipes']
+            'recipes_count', 'recipes']
 
     def get_recipes(self, obj):
         """
@@ -337,11 +338,11 @@ class UserFollowSerializer(BaseUserSerializer):
     class Meta(BaseUserSerializer.Meta):
         model = User
         fields = BaseUserSerializer.Meta.fields + [
-      'is_subscribed'  
-    ]
+            'is_subscribed']
 
     def get_is_subscribed(self, obj):
         """
         Возвращает информацию о подписке на пользователя.
         """
-        return is_user_subscribed(request=self.context.get('request'), obj=obj)
+        return is_user_subscribed(request=self.context.get('request'),
+                                  obj=obj)

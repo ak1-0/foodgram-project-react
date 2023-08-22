@@ -1,4 +1,3 @@
-from django.http import Http404
 from django.shortcuts import get_object_or_404
 
 from rest_framework.decorators import action
@@ -15,7 +14,7 @@ from .serializers import (BriefRecipeSerializer,
                           RecipeFollowSerializer,
                           UserFollowSerializer
                           )
-from .utils import recipe_add_or_del, download_shopping_cart
+from .utils import recipe_add_or_del
 
 
 class BaseRecipeMixin:
@@ -175,10 +174,3 @@ class ShoppingCartMixin(BaseRecipeMixin):
             return self._add_to_shopping_cart(request, pk)
         elif request.method == 'DELETE':
             return self._remove_from_shopping_cart(request, pk)
-        
-    @action(detail=False, methods=['get'])
-    def download_shopping_cart(self, request):
-        """
-        Скачать список покупок.
-        """
-        return download_shopping_cart(request)
